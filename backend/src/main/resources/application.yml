@@ -13,12 +13,20 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      # No entities exist yet (Phase 0). Left as 'none' deliberately:
-      # schema management is introduced with real migrations in Phase 1.
+      # Flyway (below) owns the schema. Hibernate never generates/alters
+      # DDL here. Once real entities exist (Phase 2+), this should become
+      # 'validate' so Hibernate checks entity mappings against the actual
+      # migrated schema instead of staying silent.
       ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
 
 server:
   port: ${SERVER_PORT:8080}

@@ -45,10 +45,28 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Schema migrations (versioned SQL, no Hibernate auto-DDL) -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
         <!-- Health/status endpoint for local + future ops verification -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Auto-loads backend/.env at startup (dev convenience) so
+             env vars don't need manual export before mvn/java runs. -->
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>springboot3-dotenv</artifactId>
+            <version>5.1.0</version>
         </dependency>
 
         <!-- Dev convenience: auto-restart on file change -->

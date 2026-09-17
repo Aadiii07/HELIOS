@@ -32,17 +32,12 @@ GRANT ALL PRIVILEGES ON DATABASE helios TO helios_app;
 ```powershell
 cd backend
 copy .env.example .env
-# edit .env with your real local DB password, then export as
-# environment variables before running (Spring Boot does not load
-# .env files itself), e.g. in PowerShell:
-Get-Content .env | ForEach-Object {
-    if ($_ -match '^\s*([^#=]+)=(.*)$') {
-        [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
-    }
-}
+# edit .env with your real local DB password
 mvn clean install
 mvn spring-boot:run
 ```
+
+`.env` is loaded automatically at startup (via spring-dotenv) — no manual environment-variable export needed.
 
 Verify: `http://localhost:8080/actuator/health` → `{"status":"UP"}`.
 

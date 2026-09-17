@@ -57,9 +57,17 @@ Different runtime and dependency lifecycle (Python/FastAPI vs.
 Java/Spring). Communicates with the backend over HTTP using
 backend-issued authorization, never with direct database access.
 
+### ADR-005: Flyway for schema migrations
+Versioned SQL migrations own the schema; Hibernate `ddl-auto` stays
+`none`/`validate`, never `update`/`create`. Guarantees the schema
+history is explicit and reviewable (see docs/DATABASE.md).
+
 ## Status
 
-Phase 0 (this commit): repository scaffolding, build configuration,
-and empty entrypoints for all three components. No domain logic,
-no database schema, no authentication — see backend module list
-above for what's still to come.
+Phase 0: repository scaffolding, build configuration, empty
+entrypoints for all three components — verified working locally.
+
+Phase 1 (this commit): Flyway-managed migrations wired in; baseline
+migration only (extensions). Still no domain tables, no
+authentication — see backend module list above for what's still to
+come.

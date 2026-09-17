@@ -1,7 +1,7 @@
 # HELIOS — Project State
 
-- Completed: Phase 0 (repo scaffolding: frontend/backend/ai-service foundations, env config, docs)
+- Completed: Phase 0 (scaffolding, verified locally by user — backend/frontend/ai-service all start). Phase 1 (Flyway wired in, baseline migration only, no domain tables yet).
 - In progress: none
-- Tests: none run in this environment (no network/Maven/PostgreSQL in the build sandbox — see chat for what was verified vs. not)
+- Tests: Phase 0 startup verified locally by user (backend BUILD SUCCESS + Tomcat on 8080, frontend Vite on 5173, ai-service uvicorn on 8000). Phase 1 changes syntax-checked only (XML/YAML) in the build sandbox — `mvn spring-boot:run` against a real Postgres not yet re-run locally, needs confirmation.
 - Known issues: none
-- Next phase: Phase 1 — Database + migrations + configuration
+- Next phase: Phase 2 — Authentication (P0-01)
