@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: helios-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/helios}
+    username: ${DATABASE_USERNAME:helios_app}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      # No entities exist yet (Phase 0). Left as 'none' deliberately:
+      # schema management is introduced with real migrations in Phase 1.
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
