@@ -62,12 +62,39 @@ Versioned SQL migrations own the schema; Hibernate `ddl-auto` stays
 `none`/`validate`, never `update`/`create`. Guarantees the schema
 history is explicit and reviewable (see docs/DATABASE.md).
 
+### ADR-006: Stateless JWT, no session store
+Access tokens only (HS256, short-lived). No refresh token, no
+server-side revocation/blocklist yet — logging out relies on the
+client discarding the token. A shared revocation store (Redis) is a
+P1 backlog item if immediate/"log out everywhere" revocation becomes
+a real requirement.
+
+### ADR-007: In-memory login rate limiting (single instance only)
+Failed-login tracking lives in a JVM `ConcurrentHashMap`, not a shared
+store. Correct for one backend instance; a multi-instance deployment
+needs a shared store (Redis) instead — not built now (§50, no
+overengineering ahead of an actual requirement).
+
+### ADR-008: JWT stored in localStorage, not an httpOnly cookie
+Matches the backend's stateless Bearer-token design and needs no CSRF
+handling. Trade-off: readable by any script on the page, so it's only
+as safe as the frontend's own resistance to XSS. An httpOnly-cookie
+session is the P1 hardening path if that trade-off stops being
+acceptable — not built now.
+
 ## Status
 
 Phase 0: repository scaffolding, build configuration, empty
 entrypoints for all three components — verified working locally.
 
-Phase 1 (this commit): Flyway-managed migrations wired in; baseline
-migration only (extensions). Still no domain tables, no
-authentication — see backend module list above for what's still to
-come.
+Phase 1: Flyway-managed migrations wired in; baseline migration only
+(extensions) — verified working locally against real PostgreSQL.
+
+Phase 2 (this commit): Authentication (P0-01) — backend `identity`
+module (User/AuditEvent entities, register/login/logout/me, JWT,
+BCrypt, password policy, role-restricted self-registration, in-memory
+login rate limiting, global error-response format) verified working
+locally (`mvn clean test`, 8/8 passing against real PostgreSQL).
+Frontend: real Login/Register/Dashboard pages (react-router v8
+declarative mode, AuthContext with localStorage token persistence),
+wired directly to the backend API — not yet run locally.

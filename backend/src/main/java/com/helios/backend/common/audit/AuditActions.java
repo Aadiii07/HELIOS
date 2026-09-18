@@ -1,0 +1,16 @@
+package com.helios.backend.common.audit;
+
+/**
+ * Audit action names (master spec §27). Extended as later phases add
+ * their own sensitive actions (DOCUMENT_UPLOAD, CONSENT_CREATED, ...).
+ */
+public final class AuditActions {
+
+    public static final String REGISTER = "REGISTER";
+    public static final String LOGIN = "LOGIN";
+    public static final String LOGIN_FAILED = "LOGIN_FAILED";
+    public static final String LOGOUT = "LOGOUT";
+
+    private AuditActions() {
+    }
+}
