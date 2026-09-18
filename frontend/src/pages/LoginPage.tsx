@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../auth/AuthContext";
 import { ApiRequestError } from "../api/client";
+import { PasswordField } from "../components/PasswordField";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -57,13 +58,11 @@ export default function LoginPage() {
           </div>
           <div className="field">
             <label htmlFor="password">Password</label>
-            <input
+            <PasswordField
               id="password"
-              type="password"
-              autoComplete="current-password"
-              required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={setPassword}
+              autoComplete="current-password"
             />
           </div>
           <button type="submit" className="btn-primary" disabled={submitting}>

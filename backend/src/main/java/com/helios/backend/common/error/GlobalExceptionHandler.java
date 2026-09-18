@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -40,6 +41,17 @@ public class GlobalExceptionHandler {
                 .toList();
         return ResponseEntity.badRequest()
                 .body(ApiError.of(400, "VALIDATION_ERROR", "Request failed validation", details));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleMalformedBody(HttpMessageNotReadableException ex) {
+        // A client sent a request body that isn't valid JSON (or doesn't
+        // match the expected shape) — this is a bad request (400), not a
+        // server fault (500). Previously fell through to the generic
+        // 500 handler below, which is misleading for both the client
+        // and anyone reading server logs/alerts.
+        return ResponseEntity.badRequest()
+                .body(ApiError.of(400, "MALFORMED_REQUEST", "Request body is missing or is not valid JSON"));
     }
 
     @ExceptionHandler(BadCredentialsException.class)

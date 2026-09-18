@@ -113,6 +113,15 @@ class AuthenticationFlowTests {
     }
 
     @Test
+    void malformedRequestBodyReturnsBadRequestNotServerError() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType("application/json")
+                        .content("{not valid json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+    }
+
+    @Test
     void protectedEndpointRejectsMissingToken() throws Exception {
         mockMvc.perform(get("/api/v1/auth/me"))
                 .andExpect(status().isUnauthorized())

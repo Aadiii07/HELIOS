@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import * as authApi from "../api/authApi";
 import type { Role } from "../api/authApi";
 import { ApiRequestError } from "../api/client";
+import { PasswordField } from "../components/PasswordField";
 
 const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{12,128}$/;
 
@@ -73,13 +74,11 @@ export default function RegisterPage() {
 
           <div className="field">
             <label htmlFor="password">Password</label>
-            <input
+            <PasswordField
               id="password"
-              type="password"
-              autoComplete="new-password"
-              required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={setPassword}
+              autoComplete="new-password"
             />
             {fieldErrors.password ? (
               <div className="field-error">{fieldErrors.password}</div>

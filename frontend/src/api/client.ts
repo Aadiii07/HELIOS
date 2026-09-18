@@ -1,5 +1,15 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+if (!API_BASE_URL) {
+  // Fails fast and visibly rather than silently building requests like
+  // "undefined/auth/register" (which look like a 404 against the
+  // frontend itself, not an obviously missing-config error).
+  throw new Error(
+    "VITE_API_BASE_URL is not set. Create frontend/.env.local (copy .env.example) " +
+    "and restart `npm run dev` — Vite only reads env files at server startup."
+  );
+}
+
 export interface ApiErrorBody {
   timestamp: string;
   status: number;
