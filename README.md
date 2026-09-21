@@ -4,10 +4,10 @@ Health Event & Longitudinal Intelligence Operating System — a
 patient-controlled longitudinal health-data platform. See
 `docs/ARCHITECTURE.md` for structure and design decisions.
 
-**Status:** Phase 2 — Authentication (P0-01) is fully implemented,
-backend and frontend: register/login/logout, JWT-protected endpoints,
-real Login/Register pages wired to the API. No other feature modules
-yet. See `PHASE_STATUS.md` for what's done and what's next.
+**Status:** Phases 0-3 complete and verified end-to-end. Phase 4 —
+Document Vault (P0-03) backend is verified; frontend is implemented,
+not yet locally verified. See `PHASE_STATUS.md` for what's done and
+what's next.
 
 ## Prerequisites (native, no Docker required)
 
@@ -73,6 +73,18 @@ curl -X POST http://localhost:8080/api/v1/auth/register -H "Content-Type: applic
 curl -X POST http://localhost:8080/api/v1/auth/login -H "Content-Type: application/json" -d '{\"email\":\"demo@example.com\",\"password\":\"Sup3rSecret!Pass\"}'
 # copy the "accessToken" value from the login response into TOKEN below
 curl http://localhost:8080/api/v1/auth/me -H "Authorization: Bearer TOKEN"
+```
+
+Smoke-test the patient profile (replace `TOKEN` with the `accessToken` from login, using a PATIENT-role account):
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/patient/profile" -Method Put -ContentType "application/json" -Headers @{Authorization="Bearer TOKEN"} -Body '{"firstName":"Ada","lastName":"Lovelace","dateOfBirth":"1990-01-01"}'
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/patient/profile" -Headers @{Authorization="Bearer TOKEN"}
+```
+
+Smoke-test the document vault (needs a real PDF/JPG/PNG file on disk — swap in your own path):
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/documents" -Method Post -Headers @{Authorization="Bearer TOKEN"} -Form @{file=Get-Item "C:\path\to\some-file.pdf"}
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/documents" -Headers @{Authorization="Bearer TOKEN"}
 ```
 
 ### 3. Frontend

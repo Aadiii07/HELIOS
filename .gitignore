@@ -47,5 +47,5 @@ Thumbs.db
 logs/
 
 # === Local data (never commit synthetic or real health data dumps) ===
-/local-data/
+local-data/
 /uploads/

@@ -27,6 +27,17 @@ spring:
     baseline-on-migrate: false
     validate-on-migrate: true
 
+  servlet:
+    multipart:
+      max-file-size: ${DOCUMENT_MAX_SIZE_BYTES:20971520}
+      max-request-size: ${DOCUMENT_MAX_SIZE_BYTES:20971520}
+
+document:
+  storage:
+    root: ${DOCUMENT_STORAGE_ROOT:./local-data/documents}
+  upload:
+    max-size-bytes: ${DOCUMENT_MAX_SIZE_BYTES:20971520}
+
 security:
   jwt:
     secret: ${JWT_SECRET:}

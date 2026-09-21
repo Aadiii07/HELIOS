@@ -82,6 +82,14 @@ as safe as the frontend's own resistance to XSS. An httpOnly-cookie
 session is the P1 hardening path if that trade-off stops being
 acceptable — not built now.
 
+### ADR-009: Local-filesystem object storage for now, S3 interface ready
+`ObjectStorageService` is the storage abstraction; `LocalFilesystemStorageService`
+is a real (not mocked) implementation that satisfies native-dev
+requirements (§10 — Docker/external services never required to run
+the app). No AWS SDK dependency has been added, since there is no S3
+endpoint to actually test against yet — adding one later means
+implementing the same interface, not restructuring the module.
+
 ## Status
 
 Phase 0: repository scaffolding, build configuration, empty
@@ -90,11 +98,34 @@ entrypoints for all three components — verified working locally.
 Phase 1: Flyway-managed migrations wired in; baseline migration only
 (extensions) — verified working locally against real PostgreSQL.
 
-Phase 2 (this commit): Authentication (P0-01) — backend `identity`
-module (User/AuditEvent entities, register/login/logout/me, JWT,
-BCrypt, password policy, role-restricted self-registration, in-memory
-login rate limiting, global error-response format) verified working
-locally (`mvn clean test`, 8/8 passing against real PostgreSQL).
-Frontend: real Login/Register/Dashboard pages (react-router v8
-declarative mode, AuthContext with localStorage token persistence),
-wired directly to the backend API — not yet run locally.
+Phase 2: Authentication (P0-01) — backend `identity` module
+(User/AuditEvent entities, register/login/logout/me, JWT, BCrypt,
+password policy, role-restricted self-registration, in-memory login
+rate limiting, global error-response format) and frontend
+(Login/Register/Dashboard pages, react-router v8, AuthContext with
+localStorage token persistence) — verified working end-to-end locally
+(`mvn clean test` 9/9 passing; register → login → protected dashboard
+→ logout confirmed in the browser).
+
+Phase 3 (this commit): Patient Profile (P0-02) — backend `patient`
+module (name, date of birth, phone, address, preferred language),
+scoped to PATIENT-role accounts only (`@PreAuthorize("hasRole('PATIENT')")`,
+method security enabled). No client-supplied ID anywhere in this
+API — every request resolves "my profile" from the authenticated
+JWT, which is what rules out IDOR here by construction rather than
+by a checked ownership field. Backend verified locally (`mvn clean
+test`, 17/17 passing). Frontend: a Profile view/edit page (create-vs-
+update handled by the same form, based on whether GET returns 404
+PROFILE_NOT_FOUND) — verified working in the browser (including a
+layout/redirect polish pass).
+
+Phase 4 (this commit): Document Vault (P0-03) — backend `documents`
+module (upload with magic-byte content validation against a
+PDF/JPG/PNG allow-list, paginated list, metadata, content download,
+soft-delete — all scoped to PATIENT-role accounts and the
+requester's own documents only) verified locally (`mvn clean test`,
+29/29 passing). Storage is a clean interface (`ObjectStorageService`)
+with a real local-filesystem implementation for native dev (see
+ADR-009) — no S3 dependency added yet. Frontend: a Documents page
+(upload, list, download via Blob + synthetic anchor click, delete
+with confirmation) — not yet run locally.
