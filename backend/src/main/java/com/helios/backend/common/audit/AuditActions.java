@@ -15,6 +15,7 @@ public final class AuditActions {
     public static final String DOCUMENT_UPLOAD = "DOCUMENT_UPLOAD";
     public static final String DOCUMENT_VIEW = "DOCUMENT_VIEW";
     public static final String DOCUMENT_DELETE = "DOCUMENT_DELETE";
+    public static final String CANDIDATE_REVIEWED = "CANDIDATE_REVIEWED";
 
     private AuditActions() {
     }

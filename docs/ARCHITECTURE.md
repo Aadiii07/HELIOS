@@ -90,6 +90,27 @@ the app). No AWS SDK dependency has been added, since there is no S3
 endpoint to actually test against yet — adding one later means
 implementing the same interface, not restructuring the module.
 
+### ADR-010: PDF text extraction only; no OCR yet
+`TextExtractor` is the abstraction; `PdfTextExtractor` (Apache PDFBox,
+pure Java) is the only implementation. Image documents (JPG/PNG) are
+marked `UNSUPPORTED_FORMAT` rather than faking an extraction result.
+Real OCR needs a native dependency (e.g. Tesseract via Tess4j) that
+this project hasn't added — given how much native/external-tool
+friction this project has already hit in Windows setup, adding one
+without a way to verify it works is worse than being explicit about
+the gap. A clean extension point (implement `TextExtractor`) is
+ready for when that's actually needed.
+
+`LabValueCandidateExtractor`'s line parser was originally column-gap
+based (required 2+ consecutive spaces between fields), which missed
+real-world PDFs using single-space-separated columns — found via
+user testing with an actual lab-report PDF, not a hypothetical.
+Rewritten to parse tokens right-to-left (reference range, then unit
+if preceded by a number, then the numeric value, everything else is
+the label) so it no longer depends on how many spaces a given PDF
+generator happens to use. Still an explicitly best-effort heuristic,
+not a general lab-report parser — many layouts will still miss.
+
 ## Status
 
 Phase 0: repository scaffolding, build configuration, empty
@@ -119,13 +140,26 @@ update handled by the same form, based on whether GET returns 404
 PROFILE_NOT_FOUND) — verified working in the browser (including a
 layout/redirect polish pass).
 
-Phase 4 (this commit): Document Vault (P0-03) — backend `documents`
-module (upload with magic-byte content validation against a
-PDF/JPG/PNG allow-list, paginated list, metadata, content download,
-soft-delete — all scoped to PATIENT-role accounts and the
-requester's own documents only) verified locally (`mvn clean test`,
-29/29 passing). Storage is a clean interface (`ObjectStorageService`)
-with a real local-filesystem implementation for native dev (see
-ADR-009) — no S3 dependency added yet. Frontend: a Documents page
-(upload, list, download via Blob + synthetic anchor click, delete
-with confirmation) — not yet run locally.
+Phase 4: Document Vault (P0-03) — backend `documents` module (upload
+with magic-byte content validation against a PDF/JPG/PNG allow-list,
+paginated list, metadata, content download, soft-delete — all scoped
+to PATIENT-role accounts and the requester's own documents only)
+verified locally (`mvn clean test`, 29/29 passing). Storage is a
+clean interface (`ObjectStorageService`) with a real local-filesystem
+implementation for native dev (see ADR-009) — no S3 dependency added
+yet. Frontend: a Documents page (upload, list, download via Blob +
+synthetic anchor click, delete with confirmation) — verified working
+in the browser.
+
+Phase 5 (this commit): Document Intelligence (P0-04) — backend
+extraction (see ADR-010: PDF only, real Apache PDFBox text
+extraction; images marked UNSUPPORTED_FORMAT). A deterministic,
+rule-based parser (`LabValueCandidateExtractor` — explicitly not
+ML/LLM-based) looks for lab-report-shaped lines and produces
+`ExtractionCandidate` rows, always `PENDING` review — nothing is
+auto-trusted into a confirmed fact (master spec §16). Verified
+locally (`mvn clean test`, 36/36 passing). Frontend: an extraction-
+status badge per document, and a review page (Confirm/Reject/Correct
+per candidate) — a correction keeps the original extracted value
+alongside the patient's fix rather than overwriting it (master spec
+§55). Not yet run locally.

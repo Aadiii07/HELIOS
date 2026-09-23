@@ -4,10 +4,10 @@ Health Event & Longitudinal Intelligence Operating System — a
 patient-controlled longitudinal health-data platform. See
 `docs/ARCHITECTURE.md` for structure and design decisions.
 
-**Status:** Phases 0-3 complete and verified end-to-end. Phase 4 —
-Document Vault (P0-03) backend is verified; frontend is implemented,
-not yet locally verified. See `PHASE_STATUS.md` for what's done and
-what's next.
+**Status:** Phases 0-4 complete and verified end-to-end. Phase 5 —
+Document Intelligence (P0-04) backend is verified; frontend is
+implemented, not yet locally verified. See `PHASE_STATUS.md` for
+what's done and what's next.
 
 ## Prerequisites (native, no Docker required)
 
@@ -85,6 +85,13 @@ Smoke-test the document vault (needs a real PDF/JPG/PNG file on disk — swap in
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:8080/api/v1/documents" -Method Post -Headers @{Authorization="Bearer TOKEN"} -Form @{file=Get-Item "C:\path\to\some-file.pdf"}
 Invoke-RestMethod -Uri "http://localhost:8080/api/v1/documents" -Headers @{Authorization="Bearer TOKEN"}
+```
+
+Smoke-test document intelligence (upload a real lab-report-style PDF — extraction only runs for PDFs, not JPG/PNG — then list what it found):
+```powershell
+$doc = Invoke-RestMethod -Uri "http://localhost:8080/api/v1/documents" -Method Post -Headers @{Authorization="Bearer TOKEN"} -Form @{file=Get-Item "C:\path\to\lab-report.pdf"}
+$doc.extractionStatus
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/documents/$($doc.id)/candidates" -Headers @{Authorization="Bearer TOKEN"}
 ```
 
 ### 3. Frontend

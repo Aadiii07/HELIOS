@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { Link } from "react-router";
 import { useAuth } from "../auth/AuthContext";
 import { ApiRequestError } from "../api/client";
 import * as documentsApi from "../api/documentsApi";
-import type { DocumentMeta } from "../api/documentsApi";
+import type { DocumentMeta, ExtractionStatus } from "../api/documentsApi";
 
 const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png";
 
@@ -14,6 +15,19 @@ function formatSize(bytes: number): string {
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function extractionStatusLabel(status: ExtractionStatus): string {
+  switch (status) {
+    case "PROCESSED":
+      return "Processed";
+    case "UNSUPPORTED_FORMAT":
+      return "Not supported";
+    case "FAILED":
+      return "Failed";
+    default:
+      return "Pending";
+  }
 }
 
 export default function DocumentsPage() {
@@ -130,6 +144,7 @@ export default function DocumentsPage() {
               <th>Type</th>
               <th>Size</th>
               <th>Uploaded</th>
+              <th>Extraction</th>
               <th></th>
             </tr>
           </thead>
@@ -140,7 +155,17 @@ export default function DocumentsPage() {
                 <td>{doc.contentType}</td>
                 <td>{formatSize(doc.sizeBytes)}</td>
                 <td>{formatDate(doc.createdAt)}</td>
+                <td>
+                  <span className={`extraction-badge extraction-badge-${doc.extractionStatus.toLowerCase()}`}>
+                    {extractionStatusLabel(doc.extractionStatus)}
+                  </span>
+                </td>
                 <td className="document-actions">
+                  {doc.extractionStatus === "PROCESSED" && (
+                    <Link className="link-button" to={`/documents/${doc.id}/candidates`}>
+                      Review data
+                    </Link>
+                  )}
                   <button className="link-button" onClick={() => handleDownload(doc)}>
                     Download
                   </button>

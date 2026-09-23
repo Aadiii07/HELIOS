@@ -305,3 +305,107 @@ select {
 .link-button-danger:hover {
   color: #8c1f19;
 }
+
+.extraction-badge,
+.confidence-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.extraction-badge-processed {
+  color: var(--color-accent-hover);
+  border-color: var(--color-accent);
+  background: #e6f2ef;
+}
+
+.extraction-badge-failed {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+
+.confidence-badge-high {
+  color: var(--color-accent-hover);
+  border-color: var(--color-accent);
+  background: #e6f2ef;
+}
+
+.confidence-badge-medium {
+  color: #8a6d1a;
+  border-color: #d8b74a;
+  background: #fbf3dd;
+}
+
+.confidence-badge-low {
+  color: var(--color-text-muted);
+}
+
+.candidate-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.candidate-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.candidate-card-value {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.candidate-range {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.candidate-source {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+.candidate-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.candidate-correction-form {
+  border-top: 1px solid var(--color-border);
+  margin-top: 8px;
+  padding-top: 12px;
+}
+
+.review-status {
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.review-status-confirmed {
+  color: var(--color-accent-hover);
+}
+
+.review-status-rejected {
+  color: var(--color-danger);
+}
+
+.review-status-corrected {
+  color: #8a6d1a;
+}

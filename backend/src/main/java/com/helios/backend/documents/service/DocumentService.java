@@ -31,17 +31,20 @@ public class DocumentService {
     private final ObjectStorageService storage;
     private final FileContentValidator validator;
     private final AuditService auditService;
+    private final DocumentExtractionService extractionService;
 
     public DocumentService(
             DocumentRepository repository,
             ObjectStorageService storage,
             FileContentValidator validator,
-            AuditService auditService
+            AuditService auditService,
+            DocumentExtractionService extractionService
     ) {
         this.repository = repository;
         this.storage = storage;
         this.validator = validator;
         this.auditService = auditService;
+        this.extractionService = extractionService;
     }
 
     @Transactional
@@ -71,6 +74,8 @@ public class DocumentService {
                 file.getContentType(), file.getSize(), checksum
         );
         document = repository.save(document);
+
+        extractionService.processDocument(document, file);
 
         auditService.record(patientId, null, AuditActions.DOCUMENT_UPLOAD,
                 "Document", document.getId().toString(), AuditResults.SUCCESS, ipAddress);
@@ -119,7 +124,7 @@ public class DocumentService {
     private DocumentResponse toResponse(Document d) {
         return new DocumentResponse(
                 d.getId(), d.getOriginalFilename(), d.getContentType(),
-                d.getSizeBytes(), d.getChecksumSha256(), d.getCreatedAt()
+                d.getSizeBytes(), d.getChecksumSha256(), d.getExtractionStatus(), d.getCreatedAt()
         );
     }
 

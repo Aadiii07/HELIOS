@@ -31,6 +31,13 @@ public class Document {
     @Column(name = "checksum_sha256", nullable = false, length = 64)
     private String checksumSha256;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "extraction_status", nullable = false, length = 32)
+    private ExtractionStatus extractionStatus = ExtractionStatus.NOT_ATTEMPTED;
+
+    @Column(name = "processed_at")
+    private Instant processedAt;
+
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
@@ -74,6 +81,11 @@ public class Document {
         return deletedAt != null;
     }
 
+    public void markExtractionStatus(ExtractionStatus status) {
+        this.extractionStatus = status;
+        this.processedAt = Instant.now();
+    }
+
     public UUID getId() {
         return id;
     }
@@ -100,6 +112,14 @@ public class Document {
 
     public String getChecksumSha256() {
         return checksumSha256;
+    }
+
+    public ExtractionStatus getExtractionStatus() {
+        return extractionStatus;
+    }
+
+    public Instant getProcessedAt() {
+        return processedAt;
     }
 
     public Instant getCreatedAt() {

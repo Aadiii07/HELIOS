@@ -111,6 +111,15 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- PDF text extraction (Document Intelligence, P0-04). Pure
+             Java, no native binaries — safe to add without an extra
+             install step. -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.8</version>
+        </dependency>
     </dependencies>
 
     <build>
