@@ -4,10 +4,10 @@ Health Event & Longitudinal Intelligence Operating System — a
 patient-controlled longitudinal health-data platform. See
 `docs/ARCHITECTURE.md` for structure and design decisions.
 
-**Status:** Phases 0-4 complete and verified end-to-end. Phase 5 —
-Document Intelligence (P0-04) backend is verified; frontend is
-implemented, not yet locally verified. See `PHASE_STATUS.md` for
-what's done and what's next.
+**Status:** Phases 0-5 complete and verified end-to-end. Phase 6 —
+Structured Observations (P0-05) backend is implemented, not yet
+locally verified. See `PHASE_STATUS.md` for what's done and what's
+next.
 
 ## Prerequisites (native, no Docker required)
 
@@ -92,6 +92,12 @@ Smoke-test document intelligence (upload a real lab-report-style PDF — extract
 $doc = Invoke-RestMethod -Uri "http://localhost:8080/api/v1/documents" -Method Post -Headers @{Authorization="Bearer TOKEN"} -Form @{file=Get-Item "C:\path\to\lab-report.pdf"}
 $doc.extractionStatus
 Invoke-RestMethod -Uri "http://localhost:8080/api/v1/documents/$($doc.id)/candidates" -Headers @{Authorization="Bearer TOKEN"}
+```
+
+Smoke-test observations (manual entry, then list):
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/observations" -Method Post -ContentType "application/json" -Headers @{Authorization="Bearer TOKEN"} -Body '{"displayName":"Body Weight","value":"70.5","unit":"kg","effectiveDate":"2026-01-10"}'
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/observations" -Headers @{Authorization="Bearer TOKEN"}
 ```
 
 ### 3. Frontend

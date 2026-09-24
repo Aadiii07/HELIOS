@@ -111,6 +111,20 @@ the label) so it no longer depends on how many spaces a given PDF
 generator happens to use. Still an explicitly best-effort heuristic,
 not a general lab-report parser — many layouts will still miss.
 
+### ADR-011: Observation.code is a deterministic normalization, not a real coding system
+`CodeNormalizer` turns a display name into an uppercase, underscore-
+separated code (e.g. "Hemoglobin A1c" → "HEMOGLOBIN_A1C") purely so
+the same measurement typed or extracted with different casing/
+spacing groups together. This is NOT a LOINC/SNOMED mapping — real
+clinical coding is a distinct, much larger effort for the
+FHIR/Interoperability phase (master spec §45), not implied or faked
+here. An Observation is only ever created from a patient-confirmed/
+corrected extraction candidate or direct manual entry — there is no
+auto-accepted path, and confidence is always HIGH by construction
+(a human verified the value; the original extraction confidence,
+which may have been MEDIUM, is a separate, preserved fact on the
+ExtractionCandidate it came from).
+
 ## Status
 
 Phase 0: repository scaffolding, build configuration, empty
@@ -151,15 +165,27 @@ yet. Frontend: a Documents page (upload, list, download via Blob +
 synthetic anchor click, delete with confirmation) — verified working
 in the browser.
 
-Phase 5 (this commit): Document Intelligence (P0-04) — backend
-extraction (see ADR-010: PDF only, real Apache PDFBox text
-extraction; images marked UNSUPPORTED_FORMAT). A deterministic,
-rule-based parser (`LabValueCandidateExtractor` — explicitly not
-ML/LLM-based) looks for lab-report-shaped lines and produces
-`ExtractionCandidate` rows, always `PENDING` review — nothing is
-auto-trusted into a confirmed fact (master spec §16). Verified
-locally (`mvn clean test`, 36/36 passing). Frontend: an extraction-
-status badge per document, and a review page (Confirm/Reject/Correct
-per candidate) — a correction keeps the original extracted value
-alongside the patient's fix rather than overwriting it (master spec
-§55). Not yet run locally.
+Phase 5: Document Intelligence (P0-04) — backend extraction (see
+ADR-010: PDF only, real Apache PDFBox text extraction; images marked
+UNSUPPORTED_FORMAT). A deterministic, rule-based parser
+(`LabValueCandidateExtractor` — explicitly not ML/LLM-based, and
+rewritten mid-phase after user testing found it missed real-world
+single-space-separated PDFs) looks for lab-report-shaped lines and
+produces `ExtractionCandidate` rows, always `PENDING` review —
+nothing is auto-trusted into a confirmed fact (master spec §16).
+Frontend: an extraction-status badge per document, and a review page
+(Confirm/Reject/Correct per candidate). Verified working end-to-end
+in the browser with a real user-supplied lab-report PDF.
+
+Phase 6 (this commit): Structured Observations (P0-05) backend —
+`observations` module. An `Observation` is created only from a
+patient's CONFIRMED/CORRECTED review of an extraction candidate, or
+direct manual entry — never automatically from extraction alone.
+Guards against double-creating an Observation if the same candidate
+is reviewed twice (a `CANDIDATE_ALREADY_REVIEWED` conflict — found
+and fixed while building this integration, not shipped as a known
+gap). The model is deliberately flexible (`code`/`displayName` are
+free text, not a fixed enum of test types — see ADR-011) with a
+`numericValue` parsed opportunistically alongside the preserved raw
+string, so future trend/timeline features have something to sort and
+compare without losing the original value. Not yet verified locally.
