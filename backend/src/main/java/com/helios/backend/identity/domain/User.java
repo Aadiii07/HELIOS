@@ -63,6 +63,10 @@ public class User {
         this.lastLoginAt = Instant.now();
     }
 
+    public void changePasswordHash(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+    }
+
     public UUID getId() {
         return id;
     }

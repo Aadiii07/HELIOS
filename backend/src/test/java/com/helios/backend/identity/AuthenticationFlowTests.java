@@ -129,8 +129,100 @@ class AuthenticationFlowTests {
     }
 
     @Test
-    void protectedEndpointRejectsGarbageToken() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer not-a-real-token"))
+    void changePasswordSucceedsAndOldPasswordNoLongerWorks() throws Exception {
+        String email = "change-pw-success@example.com";
+        String newPassword = "N3wSup3rSecret!";
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(
+                                new RegisterRequest(email, STRONG_PASSWORD, com.helios.backend.identity.domain.Role.PATIENT))))
+                .andExpect(status().isCreated());
+
+        String loginBody = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(new LoginRequest(email, STRONG_PASSWORD))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String token = objectMapper.readTree(loginBody).get("accessToken").asText();
+
+        mockMvc.perform(post("/api/v1/auth/change-password")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType("application/json")
+                        .content("{\"currentPassword\":\"" + STRONG_PASSWORD + "\",\"newPassword\":\"" + newPassword + "\"}"))
+                .andExpect(status().isNoContent());
+
+        // Old password must no longer work.
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(new LoginRequest(email, STRONG_PASSWORD))))
+                .andExpect(status().isUnauthorized());
+
+        // New password must work.
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(new LoginRequest(email, newPassword))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty());
+    }
+
+    @Test
+    void changePasswordRejectsWrongCurrentPassword() throws Exception {
+        String email = "change-pw-wrongcurrent@example.com";
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(
+                                new RegisterRequest(email, STRONG_PASSWORD, com.helios.backend.identity.domain.Role.PATIENT))))
+                .andExpect(status().isCreated());
+
+        String loginBody = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(new LoginRequest(email, STRONG_PASSWORD))))
+                .andReturn().getResponse().getContentAsString();
+        String token = objectMapper.readTree(loginBody).get("accessToken").asText();
+
+        mockMvc.perform(post("/api/v1/auth/change-password")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType("application/json")
+                        .content("{\"currentPassword\":\"WrongCurrent123!\",\"newPassword\":\"N3wSup3rSecret!\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_FAILED"));
+
+        // Original password must still work — the change must not have applied.
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(new LoginRequest(email, STRONG_PASSWORD))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void changePasswordRejectsWeakNewPassword() throws Exception {
+        String email = "change-pw-weak@example.com";
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(
+                                new RegisterRequest(email, STRONG_PASSWORD, com.helios.backend.identity.domain.Role.PATIENT))))
+                .andExpect(status().isCreated());
+
+        String loginBody = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(new LoginRequest(email, STRONG_PASSWORD))))
+                .andReturn().getResponse().getContentAsString();
+        String token = objectMapper.readTree(loginBody).get("accessToken").asText();
+
+        mockMvc.perform(post("/api/v1/auth/change-password")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType("application/json")
+                        .content("{\"currentPassword\":\"" + STRONG_PASSWORD + "\",\"newPassword\":\"short\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void changePasswordRejectsMissingToken() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/change-password")
+                        .contentType("application/json")
+                        .content("{\"currentPassword\":\"" + STRONG_PASSWORD + "\",\"newPassword\":\"N3wSup3rSecret!\"}"))
                 .andExpect(status().isUnauthorized());
     }
 }

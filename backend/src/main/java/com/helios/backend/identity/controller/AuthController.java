@@ -2,6 +2,7 @@ package com.helios.backend.identity.controller;
 
 import com.helios.backend.common.web.ClientIpResolver;
 import com.helios.backend.identity.dto.AuthResponse;
+import com.helios.backend.identity.dto.ChangePasswordRequest;
 import com.helios.backend.identity.dto.LoginRequest;
 import com.helios.backend.identity.dto.RegisterRequest;
 import com.helios.backend.identity.dto.UserSummaryResponse;
@@ -43,5 +44,15 @@ public class AuthController {
     @GetMapping("/me")
     public AuthenticatedUser me(@AuthenticationPrincipal AuthenticatedUser user) {
         return user;
+    }
+
+    @PostMapping("/change-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @RequestBody ChangePasswordRequest request,
+            HttpServletRequest servletRequest
+    ) {
+        authService.changePassword(user.id(), request, ClientIpResolver.resolve(servletRequest));
     }
 }

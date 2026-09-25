@@ -125,6 +125,16 @@ auto-accepted path, and confidence is always HIGH by construction
 which may have been MEDIUM, is a separate, preserved fact on the
 ExtractionCandidate it came from).
 
+### ADR-012: Change-password added to the identity module (not a new module)
+`POST /api/v1/auth/change-password` — authenticated, requires the
+current password, enforces the same policy as registration (shared
+via `PasswordPolicy`, so the two can't drift apart). Known,
+documented limitation shared with logout (ADR-006): this does not
+invalidate JWTs issued before the change — stateless tokens remain
+valid until they expire naturally. A revocation/blocklist for
+immediate invalidation is the same P1 backlog item logout already
+notes, not a new gap.
+
 ## Status
 
 Phase 0: repository scaffolding, build configuration, empty
@@ -189,3 +199,7 @@ free text, not a fixed enum of test types — see ADR-011) with a
 `numericValue` parsed opportunistically alongside the preserved raw
 string, so future trend/timeline features have something to sort and
 compare without losing the original value. Not yet verified locally.
+
+Also this commit: change-password added to the identity module (see
+ADR-012) — user-requested, out of phase order but a natural fit for
+P0-01's existing scope. Not yet verified locally.

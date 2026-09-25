@@ -6,6 +6,7 @@ import com.helios.backend.common.audit.AuditService;
 import com.helios.backend.identity.domain.AccountStatus;
 import com.helios.backend.identity.domain.User;
 import com.helios.backend.identity.dto.AuthResponse;
+import com.helios.backend.identity.dto.ChangePasswordRequest;
 import com.helios.backend.identity.dto.LoginRequest;
 import com.helios.backend.identity.dto.RegisterRequest;
 import com.helios.backend.identity.dto.UserSummaryResponse;
@@ -18,6 +19,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -99,8 +102,34 @@ public class AuthService {
         // is responsible for discarding the token. A server-side
         // revocation/blocklist (needed for "log out everywhere" or
         // immediate revocation) is a P1 backlog item, not built here.
-        java.util.UUID userId = userIdString == null ? null : java.util.UUID.fromString(userIdString);
+        UUID userId = userIdString == null ? null : UUID.fromString(userIdString);
         auditService.record(userId, email, AuditActions.LOGOUT, "User", userIdString, AuditResults.SUCCESS, ipAddress);
+    }
+
+    @Transactional
+    public void changePassword(UUID userId, ChangePasswordRequest request, String ipAddress) {
+        // userId comes only from the validated JWT principal, never a
+        // client-supplied path/body value — this can only ever change
+        // the caller's own password (same IDOR-prevention pattern as
+        // the rest of the app).
+        User user = userRepository.findById(userId).orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+            auditService.record(userId, user.getEmail(), AuditActions.PASSWORD_CHANGE_FAILED,
+                    "User", userId.toString(), AuditResults.FAILURE, ipAddress);
+            throw new BadCredentialsException("Current password is incorrect");
+        }
+
+        user.changePasswordHash(passwordEncoder.encode(request.newPassword()));
+
+        auditService.record(userId, user.getEmail(), AuditActions.PASSWORD_CHANGED,
+                "User", userId.toString(), AuditResults.SUCCESS, ipAddress);
+
+        // Known limitation, documented rather than silently ignored:
+        // this does NOT invalidate any JWT issued before the change —
+        // stateless tokens remain valid until they naturally expire
+        // (see ADR-006). A revocation/blocklist to force immediate
+        // re-login everywhere is the same P1 backlog item logout notes.
     }
 
     private String normalizeEmail(String email) {

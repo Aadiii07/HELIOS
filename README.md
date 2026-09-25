@@ -100,6 +100,11 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/v1/observations" -Method Post 
 Invoke-RestMethod -Uri "http://localhost:8080/api/v1/observations" -Headers @{Authorization="Bearer TOKEN"}
 ```
 
+Smoke-test change-password (useful for regaining access to a test account whose password you've forgotten — get TOKEN from a fresh login first):
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/auth/change-password" -Method Post -ContentType "application/json" -Headers @{Authorization="Bearer TOKEN"} -Body '{"currentPassword":"YourCurrentPassword123!","newPassword":"YourNewPassword456!"}'
+```
+
 ### 3. Frontend
 
 ```powershell

@@ -12,13 +12,11 @@ public record RegisterRequest(
         @Email
         String email,
 
-        // Minimum 12 characters, at least one uppercase, one lowercase,
-        // one digit (master spec §13: "secure password policy").
+        // See PasswordPolicy — shared with ChangePasswordRequest so the
+        // two can't silently drift apart (master spec §13: "secure
+        // password policy").
         @NotBlank
-        @Pattern(
-                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{12,128}$",
-                message = "password must be at least 12 characters and include an uppercase letter, a lowercase letter, and a digit"
-        )
+        @Pattern(regexp = PasswordPolicy.REGEX, message = PasswordPolicy.MESSAGE)
         String password,
 
         @NotNull
