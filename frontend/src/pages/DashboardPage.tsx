@@ -46,6 +46,13 @@ export default function DashboardPage() {
             </Link>
           </>
         )}
+        <Link
+          to="/change-password"
+          className="btn-secondary"
+          style={{ textDecoration: "none", textAlign: "center", display: "inline-block" }}
+        >
+          Change password
+        </Link>
         <button className="btn-secondary" onClick={handleLogout}>
           Sign out
         </button>

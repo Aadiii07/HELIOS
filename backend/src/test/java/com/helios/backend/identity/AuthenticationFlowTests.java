@@ -129,6 +129,12 @@ class AuthenticationFlowTests {
     }
 
     @Test
+    void protectedEndpointRejectsGarbageToken() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer not-a-real-token"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void changePasswordSucceedsAndOldPasswordNoLongerWorks() throws Exception {
         String email = "change-pw-success@example.com";
         String newPassword = "N3wSup3rSecret!";

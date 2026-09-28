@@ -202,4 +202,8 @@ compare without losing the original value. Not yet verified locally.
 
 Also this commit: change-password added to the identity module (see
 ADR-012) — user-requested, out of phase order but a natural fit for
-P0-01's existing scope. Not yet verified locally.
+P0-01's existing scope. Backend verified locally (`mvn clean test`).
+A Change Password page (`/change-password`, linked from the
+Dashboard for every role) is implemented but not yet run in the
+browser. Note this is change-password, NOT forgot-password: it
+requires being signed in and knowing the current password.

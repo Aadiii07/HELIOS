@@ -50,3 +50,12 @@ export function logout(token: string): Promise<void> {
 export function me(token: string): Promise<CurrentUser> {
   return apiRequest<CurrentUser>("/auth/me", { token });
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export function changePassword(token: string, request: ChangePasswordRequest): Promise<void> {
+  return apiRequest<void>("/auth/change-password", { method: "POST", body: request, token });
+}
