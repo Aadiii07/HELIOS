@@ -44,6 +44,13 @@ export default function DashboardPage() {
             >
               Your documents
             </Link>
+            <Link
+              to="/observations"
+              className="btn-primary"
+              style={{ textDecoration: "none", textAlign: "center", display: "inline-block" }}
+            >
+              Observations
+            </Link>
           </>
         )}
         <Link

@@ -202,8 +202,14 @@ compare without losing the original value. Not yet verified locally.
 
 Also this commit: change-password added to the identity module (see
 ADR-012) — user-requested, out of phase order but a natural fit for
-P0-01's existing scope. Backend verified locally (`mvn clean test`).
-A Change Password page (`/change-password`, linked from the
-Dashboard for every role) is implemented but not yet run in the
-browser. Note this is change-password, NOT forgot-password: it
-requires being signed in and knowing the current password.
+P0-01's existing scope. Verified end-to-end: backend `mvn clean
+test`, and a Change Password page (`/change-password`, linked from
+the Dashboard for every role) confirmed working in the browser. Note
+this is change-password, NOT forgot-password: it requires being
+signed in and knowing the current password — no reset-token flow
+exists.
+
+Also this commit: Phase 6 frontend — an Observations page
+(`/observations`), listing confirmed measurements (from document
+review or manual entry) with an optional measurement-name filter and
+a manual-entry form. Not yet run in the browser.
