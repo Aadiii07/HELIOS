@@ -135,6 +135,16 @@ valid until they expire naturally. A revocation/blocklist for
 immediate invalidation is the same P1 backlog item logout already
 notes, not a new gap.
 
+### ADR-013: Timeline is a read-only view, not a new stored entity
+`TimelineService` merges Documents and Observations in application
+code (not a new table/migration) — the master spec frames the
+timeline as displaying already-existing events, not introducing new
+ones. Merging happens in memory via `Pageable.unpaged()` against
+each repository, which is a documented MVP-scale simplification: a
+patient with very large history would need a real DB-level UNION or
+cursor-based approach instead — not a problem at the data volumes an
+early product sees, and deliberately not solved ahead of that need.
+
 ## Status
 
 Phase 0: repository scaffolding, build configuration, empty
@@ -198,18 +208,26 @@ gap). The model is deliberately flexible (`code`/`displayName` are
 free text, not a fixed enum of test types — see ADR-011) with a
 `numericValue` parsed opportunistically alongside the preserved raw
 string, so future trend/timeline features have something to sort and
-compare without losing the original value. Not yet verified locally.
+compare without losing the original value. Verified locally (`mvn
+clean test`).
 
-Also this commit: change-password added to the identity module (see
-ADR-012) — user-requested, out of phase order but a natural fit for
-P0-01's existing scope. Verified end-to-end: backend `mvn clean
-test`, and a Change Password page (`/change-password`, linked from
-the Dashboard for every role) confirmed working in the browser. Note
-this is change-password, NOT forgot-password: it requires being
-signed in and knowing the current password — no reset-token flow
-exists.
+Also: change-password added to the identity module (see ADR-012) —
+user-requested, out of phase order but a natural fit for P0-01's
+existing scope. Verified end-to-end: backend `mvn clean test`, and a
+Change Password page (`/change-password`, linked from the Dashboard
+for every role) confirmed working in the browser. Note this is
+change-password, NOT forgot-password: it requires being signed in
+and knowing the current password — no reset-token flow exists.
 
-Also this commit: Phase 6 frontend — an Observations page
-(`/observations`), listing confirmed measurements (from document
-review or manual entry) with an optional measurement-name filter and
-a manual-entry form. Not yet run in the browser.
+Also: Phase 6 frontend — an Observations page (`/observations`),
+listing confirmed measurements (from document review or manual
+entry) with an optional measurement-name filter and a manual-entry
+form. Verified working in the browser, including the Phase 5→6
+integration (confirming a document candidate produces an Observation
+visible here).
+
+Phase 7 (this commit): Health Timeline (P0-06) backend — `timeline`
+module (see ADR-013). A unified, chronological, filterable (date
+range, observation code, source, document) feed over Documents and
+Observations, most-recent-first. Every event traces to exactly one
+underlying record — nothing synthesized. Not yet verified locally.

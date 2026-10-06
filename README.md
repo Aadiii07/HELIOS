@@ -4,10 +4,10 @@ Health Event & Longitudinal Intelligence Operating System — a
 patient-controlled longitudinal health-data platform. See
 `docs/ARCHITECTURE.md` for structure and design decisions.
 
-**Status:** Phases 0-5 complete and verified end-to-end. Phase 6 —
-Structured Observations (P0-05) backend is implemented, not yet
-locally verified. See `PHASE_STATUS.md` for what's done and what's
-next.
+**Status:** Phases 0-6 complete and verified end-to-end (including
+change-password). Phase 7 — Health Timeline (P0-06) backend is
+implemented, not yet locally verified. See `PHASE_STATUS.md` for
+what's done and what's next.
 
 ## Prerequisites (native, no Docker required)
 
@@ -100,9 +100,14 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/v1/observations" -Method Post 
 Invoke-RestMethod -Uri "http://localhost:8080/api/v1/observations" -Headers @{Authorization="Bearer TOKEN"}
 ```
 
-Smoke-test change-password (useful for regaining access to a test account whose password you've forgotten — get TOKEN from a fresh login first):
+Smoke-test change-password (requires knowing the CURRENT password — this is not a forgot-password flow; get TOKEN from a fresh login first):
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:8080/api/v1/auth/change-password" -Method Post -ContentType "application/json" -Headers @{Authorization="Bearer TOKEN"} -Body '{"currentPassword":"YourCurrentPassword123!","newPassword":"YourNewPassword456!"}'
+```
+
+Smoke-test the timeline (after you have at least one document/observation):
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/timeline" -Headers @{Authorization="Bearer TOKEN"}
 ```
 
 ### 3. Frontend
